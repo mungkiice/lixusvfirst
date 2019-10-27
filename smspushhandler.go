@@ -71,6 +71,14 @@ func pushSMS(c *gin.Context) {
 		}
 
 	}
+	var newSMS = SMS{
+		To:           req.To,
+		From:         req.From,
+		Message:      req.Text,
+		VendorStatus: response,
+		Client:       client.Username,
+	}
+	addSMS(mc, newSMS)
 	c.JSON(http.StatusOK, gin.H{
 		"response": response,
 	})
