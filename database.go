@@ -8,6 +8,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var mc *mongo.Client
+
 func getClient() *mongo.Client {
 	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
 	client, err := mongo.NewClient(clientOptions)
@@ -19,4 +21,8 @@ func getClient() *mongo.Client {
 		log.Fatal(err)
 	}
 	return client
+}
+
+func init() {
+	mc = getClient()
 }

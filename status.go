@@ -31,13 +31,13 @@ func findAllStatus(c *mongo.Client, filter bson.M) (result []*SMSStatus) {
 	collection := c.Database("vfirst").Collection("SMS")
 	cur, err := collection.Find(context.TODO(), filter)
 	if err != nil {
-		log.Fatal("Error on finding the documents", err)
+		log.Println("Error on finding the documents:", err)
 	}
 	for cur.Next(context.TODO()) {
 		var status SMSStatus
 		err := cur.Decode(&status)
 		if err != nil {
-			log.Fatal("Error on decoding the document", err)
+			log.Println("Error on decoding the document:", err)
 		}
 		result = append(result, &status)
 	}
@@ -53,7 +53,7 @@ func findOneStatus(c *mongo.Client, filter bson.M) (result SMSStatus) {
 func addStatus(c *mongo.Client, status SMSStatus) interface{} {
 	result, err := c.Database("vfirst").Collection("SMS").InsertOne(context.TODO(), status)
 	if err != nil {
-		log.Fatal("Error on inserting new document", err)
+		log.Println("Error on inserting new document:", err)
 	}
 	return result.InsertedID
 }
@@ -61,7 +61,7 @@ func addStatus(c *mongo.Client, status SMSStatus) interface{} {
 func removeStatus(c *mongo.Client, filter bson.M) int64 {
 	result, err := c.Database("vfirst").Collection("SMS").DeleteOne(context.TODO(), filter)
 	if err != nil {
-		log.Fatal("Error on deleting document", err)
+		log.Println("Error on deleting document:", err)
 	}
 	return result.DeletedCount
 }
@@ -69,7 +69,7 @@ func removeStatus(c *mongo.Client, filter bson.M) int64 {
 func updateStatus(c *mongo.Client, filter bson.M, newData bson.M) int64 {
 	result, err := c.Database("vfirst").Collection("SMS").UpdateOne(context.TODO(), filter, newData)
 	if err != nil {
-		log.Fatal("Error on updating document", err)
+		log.Println("Error on updating document:", err)
 	}
 	return result.ModifiedCount
 }

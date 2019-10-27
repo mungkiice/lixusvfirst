@@ -38,19 +38,19 @@ func saveStatus(c *gin.Context) {
 	msgStatus := c.Query("msg_status")
 	messageTime, err := time.Parse(timeLayout, responseTime)
 	if err != nil {
-		log.Fatal("Error on converting message time ", err)
+		log.Println("Error on converting message time:", err)
 	}
 	messageStatus, err := strconv.Atoi(status)
 	if err != nil {
-		log.Fatal("Error on converting message status ", err)
+		log.Println("Error on converting message status:", err)
 	}
 	deliveredDate, err := time.Parse(timeLayout, delivered)
 	if err != nil {
-		log.Fatal("Error on converting delivered date ", err)
+		log.Println("Error on converting delivered date:", err)
 	}
 	submitDate, err := time.Parse(timeLayout, submit)
 	if err != nil {
-		log.Fatal("Error on converting submit date ", err)
+		log.Println("Error on converting submit date:", err)
 	}
 	var newStatus = SMSStatus{
 		To:              receiver,
