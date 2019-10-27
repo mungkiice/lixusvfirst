@@ -12,6 +12,7 @@ import (
 type SMSStatus struct {
 	To              string    `bson:"to"`
 	From            string    `bson:"from"`
+	Message         string    `bson:"message"`
 	Time            time.Time `bson:"time"`
 	MessageStatus   int       `bson:"message_status"`
 	ReasonCode      string    `bson:"reason_code"`
@@ -25,6 +26,7 @@ type SMSStatus struct {
 	TextStatus      string    `bson:"text_status"`
 	SubmitDate      time.Time `bson:"submit_date"`
 	MSGStatus       string    `bson:"msg_status"`
+	VEndorStatus    string    `bson:"vendor_status"`
 }
 
 func findAllStatus(c *mongo.Client, filter bson.M) (result []*SMSStatus) {
@@ -44,11 +46,11 @@ func findAllStatus(c *mongo.Client, filter bson.M) (result []*SMSStatus) {
 	return
 }
 
-func findOneStatus(c *mongo.Client, filter bson.M) (result SMSStatus) {
-	c.Database("vfirst").Collection("SMS").
-		FindOne(context.TODO(), filter).Decode(&result)
-	return
-}
+// func findOneStatus(c *mongo.Client, filter bson.M) (result SMSStatus) {
+// 	c.Database("vfirst").Collection("SMS").
+// 		FindOne(context.TODO(), filter).Decode(&result)
+// 	return
+// }
 
 func addStatus(c *mongo.Client, status SMSStatus) interface{} {
 	result, err := c.Database("vfirst").Collection("SMS").InsertOne(context.TODO(), status)
@@ -58,18 +60,18 @@ func addStatus(c *mongo.Client, status SMSStatus) interface{} {
 	return result.InsertedID
 }
 
-func removeStatus(c *mongo.Client, filter bson.M) int64 {
-	result, err := c.Database("vfirst").Collection("SMS").DeleteOne(context.TODO(), filter)
-	if err != nil {
-		log.Println("Error on deleting document:", err)
-	}
-	return result.DeletedCount
-}
+// func removeStatus(c *mongo.Client, filter bson.M) int64 {
+// 	result, err := c.Database("vfirst").Collection("SMS").DeleteOne(context.TODO(), filter)
+// 	if err != nil {
+// 		log.Println("Error on deleting document:", err)
+// 	}
+// 	return result.DeletedCount
+// }
 
-func updateStatus(c *mongo.Client, filter bson.M, newData bson.M) int64 {
-	result, err := c.Database("vfirst").Collection("SMS").UpdateOne(context.TODO(), filter, newData)
-	if err != nil {
-		log.Println("Error on updating document:", err)
-	}
-	return result.ModifiedCount
-}
+// func updateStatus(c *mongo.Client, filter bson.M, newData bson.M) int64 {
+// 	result, err := c.Database("vfirst").Collection("SMS").UpdateOne(context.TODO(), filter, newData)
+// 	if err != nil {
+// 		log.Println("Error on updating document:", err)
+// 	}
+// 	return result.ModifiedCount
+// }

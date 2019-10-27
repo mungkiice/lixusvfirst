@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -11,7 +12,7 @@ import (
 var mc *mongo.Client
 
 func getClient() *mongo.Client {
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	clientOptions := options.Client().ApplyURI(fmt.Sprintf("%s://%s:%s", "mongodb", "localhost", "27017"))
 	client, err := mongo.NewClient(clientOptions)
 	if err != nil {
 		log.Fatal(err)

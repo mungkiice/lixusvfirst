@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	f, err := os.OpenFile("vfirst.log", os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
+	f, err := os.OpenFile("/var/www/vfirst.log", os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
 	if err != nil {
 		log.Println("error opening file:", err)
 	}
@@ -30,12 +30,13 @@ func main() {
 	gin.DisableConsoleColor()
 
 	// Logging to a file.
-	f, _ := os.Create("gin.log")
+	f, _ := os.Create("/var/www/gin.log")
 	gin.DefaultWriter = f
 
 	router := gin.Default()
 	router.GET("/app/status", saveStatus)
-	router.GET("/app/list", listStatus)
-	router.POST("/app/push", pushSMS)
+	router.GET("/app/list", VerifyToken(), listStatus)
+	router.POST("/app/push", VerifyToken(), pushSMS)
+	router.POST("/app/login", doLogin)
 	router.Run(":8080")
 }

@@ -11,20 +11,29 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type SMSRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	To       string `json:"to"`
-	From     string `json:"from"`
-	Text     string `json:"text"`
+	To   string `json:"to"`
+	From string `json:"from"`
+	Text string `json:"text"`
 }
 
 func pushSMS(c *gin.Context) {
 	var req SMSRequest
 	var response string
 	var err error
+	var client Client
+	uname, ok := c.Get("uname")
+	if !ok {
+		log.Println("Error uname doesnt exists in context")
+	}
+
+	if err := findOneClient(mc, bson.M{"username": uname.(string)}, &client); err != nil {
+		log.Println("Error on finding match client by username:", err)
+	}
+
 	var udh = ""
 	if err = c.ShouldBind(&req); err != nil {
 		log.Println("Error on binding user request:", err)
@@ -41,7 +50,7 @@ func pushSMS(c *gin.Context) {
 		for len(req.Text[pivot:]) > 160 {
 			udh = fmt.Sprintf("050003%v%02d%02d", refCode, smsCount, i)
 			log.Println("Multiple SMS UDH: ", udh)
-			response, err = sendReq(req.Username, req.Password, req.To, udh, req.From, req.Text[pivot:pivot+160], dlrURL)
+			response, err = sendReq(client.Username, client.Pass, req.To, udh, req.From, req.Text[pivot:pivot+160], dlrURL)
 			if err != nil {
 				log.Printf("Error on sending SMS %d: %v\n", i, err)
 			}
@@ -50,13 +59,13 @@ func pushSMS(c *gin.Context) {
 		}
 		udh = fmt.Sprintf("050003%v%02d%02d", refCode, smsCount, i)
 		log.Println("Multiple SMS UDH: ", udh)
-		response, err = sendReq(req.Username, req.Password, req.To, udh, req.From, req.Text[pivot:len(req.Text)], dlrURL)
+		response, err = sendReq(client.Username, client.Pass, req.To, udh, req.From, req.Text[pivot:len(req.Text)], dlrURL)
 		if err != nil {
 			log.Printf("Error on sending last SMS: %v\n", err)
 		}
 	} else {
 		log.Println("Single SMS UDH: ", udh)
-		response, err = sendReq(req.Username, req.Password, req.To, udh, req.From, req.Text, dlrURL)
+		response, err = sendReq(client.Username, client.Pass, req.To, udh, req.From, req.Text, dlrURL)
 		if err != nil {
 			log.Printf("Error on sending request to VFirst: %v\n", err)
 		}
