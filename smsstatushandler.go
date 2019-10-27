@@ -16,8 +16,9 @@ const (
 )
 
 func listStatus(c *gin.Context) {
+	uname, _ := c.Get("uname")
 	c.JSON(http.StatusOK, gin.H{
-		"SMS Status List": findAllStatus(mc, bson.M{}),
+		"SMS Status List": findAllStatus(mc, bson.M{"client": uname.(string)}),
 	})
 }
 

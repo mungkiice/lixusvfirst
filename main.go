@@ -3,11 +3,9 @@ package main
 import (
 	"context"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
@@ -40,12 +38,5 @@ func main() {
 	router.GET("/app/list", VerifyToken(), listStatus)
 	router.POST("/app/push", VerifyToken(), pushSMS)
 	router.POST("/app/login", doLogin)
-	router.GET("/app/last", func(c *gin.Context) {
-		sms := findOneSMS(mc, bson.M{})
-		c.JSON(http.StatusOK, gin.H{
-			"sms": sms,
-		})
-
-	})
 	router.Run(":8080")
 }
