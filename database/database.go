@@ -1,19 +1,24 @@
-package main
+package database
 
 import (
 	"context"
 	"fmt"
 	"log"
 
+	"github.com/mungkiice/vfirst/config"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var mc *mongo.Client
+var Conn *mongo.Client
 
-func getClient() *mongo.Client {
+func init() {
+	Conn = GetClient()
+}
+
+func GetClient() *mongo.Client {
 	clientOptions := options.Client().ApplyURI(fmt.Sprintf("%s://%s:%s",
-		"mongodb", getConfiguration().Database.Host, getConfiguration().Database.Port))
+		"mongodb", config.GetObject().Database.Host, config.GetObject().Database.Port))
 	client, err := mongo.NewClient(clientOptions)
 	if err != nil {
 		log.Fatal(err)
@@ -23,8 +28,4 @@ func getClient() *mongo.Client {
 		log.Fatal(err)
 	}
 	return client
-}
-
-func init() {
-	mc = getClient()
 }

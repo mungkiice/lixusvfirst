@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"fmt"
@@ -7,10 +7,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mungkiice/vfirst/config"
+
 	"go.mongodb.org/mongo-driver/bson"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/mungkiice/vfirst/database"
+	"github.com/mungkiice/vfirst/model"
 )
 
 type loginRequest struct {
@@ -18,21 +22,21 @@ type loginRequest struct {
 	Pass     string `json:"password" binding:"required"`
 }
 
-func doLogin(c *gin.Context) {
-	var client Client
+func DoLogin(c *gin.Context) {
+	var client model.Client
 	var req loginRequest
 
 	if err := c.ShouldBind(&req); err != nil {
 		log.Println("Error on binding user request:", err)
 	}
-	if err := findOneClient(mc, bson.M{"username": req.Username, "password": req.Pass}, &client); err != nil {
+	if err := model.FindOneClient(database.Conn, bson.M{"username": req.Username, "password": req.Pass}, &client); err != nil {
 		log.Println("Error on finding match client:", err)
 		c.JSON(http.StatusOK, gin.H{
 			"message": "client credential invalid",
 		})
 		return
 	}
-	token, err := GenerateToken(&client)
+	token, err := generateToken(&client)
 	if err != nil {
 		log.Println("Error on generating token:", err)
 	}
@@ -43,7 +47,7 @@ func doLogin(c *gin.Context) {
 	})
 }
 
-func GenerateToken(client *Client) (string, error) {
+func generateToken(client *model.Client) (string, error) {
 
 	// Create a new token object, specifying signing method and the claims
 	// you would like it to contain.
@@ -53,7 +57,7 @@ func GenerateToken(client *Client) (string, error) {
 	})
 
 	// Sign and get the complete encoded token as a string using the secret
-	tokenString, err := token.SignedString([]byte("appkeyvfirst123456"))
+	tokenString, err := token.SignedString([]byte(config.GetObject().App.Key))
 
 	return tokenString, err
 }
@@ -83,7 +87,7 @@ func VerifyToken() gin.HandlerFunc {
 				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 			}
 
-			return []byte("appkeyvfirst123456"), nil
+			return []byte(config.GetObject().App.Key), nil
 		})
 
 		if err != nil {

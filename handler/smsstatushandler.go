@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"log"
@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mungkiice/vfirst/database"
+	"github.com/mungkiice/vfirst/model"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -15,14 +17,14 @@ const (
 	timeLayout = "2006-01-02 15:04:05"
 )
 
-func listSMS(c *gin.Context) {
+func ListSMS(c *gin.Context) {
 	uname, _ := c.Get("uname")
 	c.JSON(http.StatusOK, gin.H{
-		"SMS Status List": findAllSMS(mc, bson.M{"client": uname.(string)}),
+		"SMS Status List": model.FindAllSMS(database.Conn, bson.M{"client": uname.(string)}),
 	})
 }
 
-func updateStatus(c *gin.Context) {
+func UpdateStatus(c *gin.Context) {
 	log.Println(c.Request.URL.Query())
 	uniqueID := c.Query("unique_id")
 	receiver := c.Query("to")
@@ -61,13 +63,13 @@ func updateStatus(c *gin.Context) {
 	// 	log.Println("Error on sort")
 	// }
 	log.Printf("updateSMS where to:%s from:%s client:%s", receiver, sender, strings.ToLower(regex.FindString(clientGUID)))
-
-	modifiedItems := updateSMS(mc, bson.M{
+	sms := model.FindLatestMatchSMS(database.Conn, bson.M{
 		"to":     receiver,
 		"from":   sender,
 		"client": strings.ToLower(regex.FindString(clientGUID)),
-		// "$orderby": bson.M{"_id": -1},
-	}, bson.M{
+	})
+
+	modifiedItems := sms.UpdateSMS(database.Conn, bson.M{
 		"delivered_date":    deliveredDate,
 		"client_guid":       clientGUID,
 		"message_id":        uniqueID,

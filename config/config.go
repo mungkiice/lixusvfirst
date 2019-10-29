@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"log"
@@ -8,6 +8,9 @@ import (
 )
 
 type Config struct {
+	App struct {
+		Key string `yaml:"key"`
+	} `yaml:"app"`
 	Server struct {
 		Host string `yaml:"host"`
 		Port string `yaml:"port"`
@@ -20,7 +23,7 @@ type Config struct {
 	} `yaml:"database"`
 }
 
-func getConfiguration() Config {
+func GetObject() Config {
 	f, err := os.Open("./config.yml")
 	if err != nil {
 		log.Fatalln("Error while opening config file")

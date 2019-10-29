@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"fmt"
@@ -11,26 +11,29 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mungkiice/vfirst/config"
+	"github.com/mungkiice/vfirst/database"
+	"github.com/mungkiice/vfirst/model"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-type SMSRequest struct {
+type smsRequest struct {
 	To   string `json:"to"`
 	From string `json:"from"`
 	Text string `json:"text"`
 }
 
-func pushSMS(c *gin.Context) {
-	var req SMSRequest
+func PushSMS(c *gin.Context) {
+	var req smsRequest
 	var response string
 	var err error
-	var client Client
+	var client model.Client
 	uname, ok := c.Get("uname")
 	if !ok {
 		log.Println("Error uname doesnt exists in context")
 	}
 
-	if err := findOneClient(mc, bson.M{"username": uname.(string)}, &client); err != nil {
+	if err := model.FindOneClient(database.Conn, bson.M{"username": uname.(string)}, &client); err != nil {
 		log.Println("Error on finding match client by username:", err)
 	}
 
@@ -38,10 +41,11 @@ func pushSMS(c *gin.Context) {
 	if err = c.ShouldBind(&req); err != nil {
 		log.Println("Error on binding user request:", err)
 	}
-	var dlrURL = "http://" + getConfiguration().Server.Host + "/status?" +
-		"unique_id=%7&reason=%2&to=%p&from=%P&time=%t&status=%d" +
-		"&delivered=%3&status_err=%4&client_guid=%5&client_sn=%6&" +
-		"circle=%8&operator=%9&txt_status=%13&submit_date=%14&msg_status=%16"
+	var dlrURL = "http://" + config.GetObject().Server.Host + ":" +
+		config.GetObject().Server.Port + "/status?unique_id=%7&" +
+		"reason=%2&to=%p&from=%P&time=%t&status=%d&delivered=" +
+		"%3&status_err=%4&client_guid=%5&client_sn=%6&circle=" +
+		"%8&operator=%9&txt_status=%13&submit_date=%14&msg_status=%16"
 	if len(req.Text) > 800 {
 		var pivot, i = 0, 1
 		rand.Seed(time.Now().UnixNano())
@@ -71,14 +75,14 @@ func pushSMS(c *gin.Context) {
 		}
 
 	}
-	var newSMS = SMS{
+	var newSMS = model.SMS{
 		To:           req.To,
 		From:         req.From,
 		Message:      req.Text,
 		VendorStatus: response,
 		Client:       client.Username,
 	}
-	addSMS(mc, newSMS)
+	model.AddSMS(database.Conn, newSMS)
 	c.JSON(http.StatusOK, gin.H{
 		"response": response,
 	})
