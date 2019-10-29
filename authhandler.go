@@ -14,7 +14,7 @@ import (
 )
 
 type loginRequest struct {
-	Username string `json:"username" binding:"required,email"`
+	Username string `json:"username" binding:"required"`
 	Pass     string `json:"password" binding:"required"`
 }
 
@@ -30,6 +30,7 @@ func doLogin(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "client credential invalid",
 		})
+		return
 	}
 	token, err := GenerateToken(&client)
 	if err != nil {

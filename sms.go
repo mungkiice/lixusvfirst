@@ -10,19 +10,19 @@ import (
 )
 
 type SMS struct {
-	To              string    `bson:"to"`
-	From            string    `bson:"from"`
-	Message         string    `bson:"message"`
-	Time            time.Time `bson:"time"`
-	DeliveredDate   time.Time `bson:"delivered_date`
-	ClientGUID      string    `bson:"client_guid"`
-	ClientSeqNumber string    `bson:"client_seq_number"`
-	MessageID       string    `bson:"message_id"`
-	Circle          string    `bson:"circle"`
-	Operator        string    `bson:"operator"`
-	MSGStatus       string    `bson:"msg_status"`
-	VendorStatus    string    `bson:"vendor_status"`
-	Client          string    `bson:"client"`
+	To              string     `bson:"to"`
+	From            string     `bson:"from"`
+	Message         string     `bson:"message"`
+	Time            *time.Time `bson:"time"`
+	DeliveredDate   *time.Time `bson:"delivered_date`
+	ClientGUID      string     `bson:"client_guid"`
+	ClientSeqNumber string     `bson:"client_seq_number"`
+	MessageID       string     `bson:"message_id"`
+	Circle          string     `bson:"circle"`
+	Operator        string     `bson:"operator"`
+	MSGStatus       string     `bson:"msg_status"`
+	VendorStatus    string     `bson:"vendor_status"`
+	Client          string     `bson:"client"`
 	// TextStatus      string    `bson:"text_status"`
 	// SubmitDate      time.Time `bson:"submit_date"`
 	// MessageStatus   int       `bson:"message_status"`
@@ -30,8 +30,8 @@ type SMS struct {
 	// StatusError     string    `bson:"status_error"`
 }
 
-func findAllStatus(c *mongo.Client, filter bson.M) (result []*SMS) {
-	collection := c.Database("vfirst").Collection("SMS")
+func findAllSMS(c *mongo.Client, filter bson.M) (result []*SMS) {
+	collection := c.Database("vfirst").Collection("sms")
 	cur, err := collection.Find(context.TODO(), filter)
 	if err != nil {
 		log.Println("Error on finding the documents:", err)
@@ -54,7 +54,7 @@ func findAllStatus(c *mongo.Client, filter bson.M) (result []*SMS) {
 // }
 
 func addSMS(c *mongo.Client, status SMS) interface{} {
-	result, err := c.Database("vfirst").Collection("SMS").InsertOne(context.TODO(), status)
+	result, err := c.Database("vfirst").Collection("sms").InsertOne(context.TODO(), status)
 	if err != nil {
 		log.Println("Error on inserting new document:", err)
 	}
@@ -70,7 +70,7 @@ func addSMS(c *mongo.Client, status SMS) interface{} {
 // }
 
 func updateSMS(c *mongo.Client, filter bson.M, newData bson.M) int64 {
-	result, err := c.Database("vfirst").Collection("SMS").UpdateOne(
+	result, err := c.Database("vfirst").Collection("sms").UpdateOne(
 		context.TODO(), filter, bson.D{{Key: "$set", Value: newData}})
 	if err != nil {
 		log.Println("Error on updating document:", err)

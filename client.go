@@ -14,7 +14,7 @@ type Client struct {
 }
 
 func findOneClient(c *mongo.Client, filter bson.M, client *Client) error {
-	return c.Database("vfirst").Collection("CLIENT").
+	return c.Database("vfirst").Collection("client").
 		FindOne(context.TODO(), filter).Decode(client)
 
 }

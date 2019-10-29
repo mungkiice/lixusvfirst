@@ -15,10 +15,10 @@ const (
 	timeLayout = "2006-01-02 15:04:05"
 )
 
-func listStatus(c *gin.Context) {
+func listSMS(c *gin.Context) {
 	uname, _ := c.Get("uname")
 	c.JSON(http.StatusOK, gin.H{
-		"SMS Status List": findAllStatus(mc, bson.M{"client": uname.(string)}),
+		"SMS Status List": findAllSMS(mc, bson.M{"client": uname.(string)}),
 	})
 }
 

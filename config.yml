@@ -1,0 +1,6 @@
+server:
+  host: 149.129.248.139
+  port: 80
+database:
+  host: localhost
+  port: 27017

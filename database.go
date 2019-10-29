@@ -12,7 +12,8 @@ import (
 var mc *mongo.Client
 
 func getClient() *mongo.Client {
-	clientOptions := options.Client().ApplyURI(fmt.Sprintf("%s://%s:%s", "mongodb", "localhost", "27017"))
+	clientOptions := options.Client().ApplyURI(fmt.Sprintf("%s://%s:%s",
+		"mongodb", getConfiguration().Database.Host, getConfiguration().Database.Port))
 	client, err := mongo.NewClient(clientOptions)
 	if err != nil {
 		log.Fatal(err)
