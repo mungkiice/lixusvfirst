@@ -1,12 +1,19 @@
 # Lixus-VFirst Technical Test
 
-Developed using Go programming language and uses database MongoDB.
+Developed using Go programming language and uses database MongoDB. Developed for technical test purposes only.
 
-## Functions
+## Function List
 
 Functions that contained in this application.
 
-### JWT Auth
+### 1. SMS List Table View
+
+Endpoint
+```
+http://{url}/ on browser
+```
+
+### 2. JWT Auth
 
 Endpoint
 ```
@@ -21,8 +28,8 @@ Request Header
 Request Body
 ```
 {
-	"username":"demoindo1",
-	"password":"http9876"
+    "username":"demoindo1",
+    "password":"http9876"
 }
 ```
 Response Body
@@ -34,11 +41,11 @@ Response Body
 }
 ```
 
-### List Client's SMS
+### 3. List Client's SMS
 
 Endpoint
 ```
-http://{url}/list
+http://{url}/list GET
 ```
 
 Request Header
@@ -70,11 +77,12 @@ Response Body
     ]
 }
 ```
-### Push SMS
+
+### 4. Push SMS
 
 Endpoint
 ```
-http://{url}/push
+http://{url}/push POST
 ```
 
 Request Header
@@ -90,7 +98,7 @@ Request Body
 {
 	"to": "6281289594060",
 	"from": "VFIRST",
-	"text": "Update dlr ulr"
+    "text": "Update dlr ulr"
 }
 ```
 
