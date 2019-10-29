@@ -38,7 +38,7 @@ func pushSMS(c *gin.Context) {
 	if err = c.ShouldBind(&req); err != nil {
 		log.Println("Error on binding user request:", err)
 	}
-	var dlrURL = "http://149.129.248.139/status?" +
+	var dlrURL = "http://" + getConfiguration().Server.Host + "/status?" +
 		"unique_id=%7&reason=%2&to=%p&from=%P&time=%t&status=%d" +
 		"&delivered=%3&status_err=%4&client_guid=%5&client_sn=%6&" +
 		"circle=%8&operator=%9&txt_status=%13&submit_date=%14&msg_status=%16"
