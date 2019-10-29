@@ -10,12 +10,11 @@ import (
 
 	"github.com/gin-contrib/multitemplate"
 	"github.com/gin-gonic/gin"
-	"github.com/mungkiice/vfirst/config"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 func init() {
-	f, err := os.OpenFile("/var/www/vfirst.log", os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
+	f, err := os.OpenFile("/usr/share/nginx/html/vfirst.log", os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
 	if err != nil {
 		log.Fatal("error opening file:", err)
 	}
@@ -35,18 +34,18 @@ func main() {
 	gin.DisableConsoleColor()
 
 	// Logging to a file.
-	f, _ := os.Create("/var/www/gin.log")
+	f, _ := os.Create("/usr/share/nginx/html/gin.log")
 	gin.DefaultWriter = f
 
 	router := gin.Default()
 	r := multitemplate.NewRenderer()
-	r.AddFromFiles("dashboard_page", "/var/www/web/index.html")
+	r.AddFromFiles("dashboard_page", "/usr/share/nginx/html/index.html")
 	router.HTMLRender = r
-	router.Static("/public", "/var/www/public")
+	router.Static("/public", "/usr/share/nginx/html/public")
 	router.GET("/", handler.ShowDashboard)
 	router.GET("/status", handler.UpdateStatus)
 	router.GET("/list", handler.VerifyToken(), handler.ListSMS)
 	router.POST("/push", handler.VerifyToken(), handler.PushSMS)
 	router.POST("/login", handler.DoLogin)
-	router.Run(":" + config.GetObject().Server.Port)
+	router.Run(":8080")
 }

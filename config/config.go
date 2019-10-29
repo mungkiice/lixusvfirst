@@ -24,7 +24,7 @@ type Config struct {
 }
 
 func GetObject() Config {
-	f, err := os.Open("/var/www/config.yml")
+	f, err := os.Open("/usr/share/nginx/html/config.yml")
 	if err != nil {
 		log.Fatal("Error while opening config file")
 	}
