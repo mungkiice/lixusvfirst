@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"regexp"
@@ -25,7 +26,7 @@ func ListSMS(c *gin.Context) {
 }
 
 func UpdateStatus(c *gin.Context) {
-	log.Println(c.Request.URL.Query())
+	fmt.Println(c.Request.URL.Query())
 	uniqueID := c.Query("unique_id")
 	receiver := c.Query("to")
 	sender := c.Query("from")
@@ -43,7 +44,7 @@ func UpdateStatus(c *gin.Context) {
 	// reasonCode := c.Query("reason")
 	messageTime, err := time.Parse(timeLayout, responseTime)
 	if err != nil {
-		log.Println("Error on converting message time:", err)
+		log.Fatal("Error on converting message time:", err)
 	}
 	// messageStatus, err := strconv.Atoi(status)
 	// if err != nil {
@@ -51,7 +52,7 @@ func UpdateStatus(c *gin.Context) {
 	// }
 	deliveredDate, err := time.Parse(timeLayout, delivered)
 	if err != nil {
-		log.Println("Error on converting delivered date:", err)
+		log.Fatal("Error on converting delivered date:", err)
 	}
 	// submitDate, err := time.Parse(timeLayout, submit)
 	// if err != nil {
@@ -62,13 +63,11 @@ func UpdateStatus(c *gin.Context) {
 	// if err != nil {
 	// 	log.Println("Error on sort")
 	// }
-	log.Printf("updateSMS where to:%s from:%s client:%s", receiver, sender, strings.ToLower(regex.FindString(clientGUID)))
-	sms := model.FindLatestMatchSMS(database.Conn, bson.M{
-		"to":     receiver,
-		"from":   sender,
-		"client": strings.ToLower(regex.FindString(clientGUID)),
+	sms := model.FindLatestMatchSMS(database.Conn, bson.D{
+		{"to", receiver},
+		{"from", sender},
+		{"client", strings.ToLower(regex.FindString(clientGUID))},
 	})
-
 	modifiedItems := sms.UpdateSMS(database.Conn, bson.M{
 		"delivered_date":    deliveredDate,
 		"client_guid":       clientGUID,

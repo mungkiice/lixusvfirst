@@ -27,10 +27,10 @@ func DoLogin(c *gin.Context) {
 	var req loginRequest
 
 	if err := c.ShouldBind(&req); err != nil {
-		log.Println("Error on binding user request:", err)
+		log.Fatal("Error on binding user request:", err)
 	}
 	if err := model.FindOneClient(database.Conn, bson.M{"username": req.Username, "password": req.Pass}, &client); err != nil {
-		log.Println("Error on finding match client:", err)
+		log.Fatal("Error on finding match client:", err)
 		c.JSON(http.StatusOK, gin.H{
 			"message": "client credential invalid",
 		})
@@ -38,7 +38,7 @@ func DoLogin(c *gin.Context) {
 	}
 	token, err := generateToken(&client)
 	if err != nil {
-		log.Println("Error on generating token:", err)
+		log.Fatal("Error on generating token:", err)
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"status":   "login succeed",

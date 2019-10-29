@@ -50,8 +50,9 @@
 										<th class="cell100 column2">Sender</th>
 										<th class="cell100 column3">Receiver</th>
 										<th class="cell100 column4">Message</th>
-										<th class="cell100 column5">Status on Vendor</th>
-										<th class="cell100 column6">Status on Telco</th>
+										<th class="cell100 column5">Delivered Date</th>
+										<th class="cell100 column6">Status on Vendor</th>
+										<th class="cell100 column7">Status on Telco</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -60,8 +61,9 @@
 										<td class="cell100 column2">{{.From}}</td>
 										<td class="cell100 column3">{{.To}}</td>
 										<td class="cell100 column4">{{.Message}}</td>
-										<td class="cell100 column5">{{.VendorStatus}}</td>
-										<td class="cell100 column6">{{.MSGStatus}}</td>
+										<td class="cell100 column5">{{.DeliveredDate}}</td>
+										<td class="cell100 column6">{{.VendorStatus}}</td>
+										<td class="cell100 column7">{{.MSGStatus}}</td>
 									</tr>
 									{{end}}
 								</tbody>

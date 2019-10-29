@@ -24,16 +24,16 @@ type Config struct {
 }
 
 func GetObject() Config {
-	f, err := os.Open("./config.yml")
+	f, err := os.Open("/var/www/config.yml")
 	if err != nil {
-		log.Fatalln("Error while opening config file")
+		log.Fatal("Error while opening config file")
 	}
 	defer f.Close()
 	var cfg Config
 	decoder := yaml.NewDecoder(f)
 	err = decoder.Decode(&cfg)
 	if err != nil {
-		log.Fatalln("Error while decoding config file")
+		log.Fatal("Error while decoding config file")
 	}
 	return cfg
 }

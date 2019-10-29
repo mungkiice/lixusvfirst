@@ -10,6 +10,8 @@ import (
 	"net/url"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
 	"github.com/gin-gonic/gin"
 	"github.com/mungkiice/vfirst/config"
 	"github.com/mungkiice/vfirst/database"
@@ -30,16 +32,16 @@ func PushSMS(c *gin.Context) {
 	var client model.Client
 	uname, ok := c.Get("uname")
 	if !ok {
-		log.Println("Error uname doesnt exists in context")
+		fmt.Println("Error uname doesnt exists in context")
 	}
 
 	if err := model.FindOneClient(database.Conn, bson.M{"username": uname.(string)}, &client); err != nil {
-		log.Println("Error on finding match client by username:", err)
+		fmt.Println("Error on finding match client by username:", err)
 	}
 
 	var udh = ""
 	if err = c.ShouldBind(&req); err != nil {
-		log.Println("Error on binding user request:", err)
+		fmt.Println("Error on binding user request:", err)
 	}
 	var dlrURL = "http://" + config.GetObject().Server.Host + ":" +
 		config.GetObject().Server.Port + "/status?unique_id=%7&" +
@@ -53,36 +55,46 @@ func PushSMS(c *gin.Context) {
 		smsCount := int(math.Ceil(float64(len(req.Text)) / 160))
 		for len(req.Text[pivot:]) > 160 {
 			udh = fmt.Sprintf("050003%v%02d%02d", refCode, smsCount, i)
-			log.Println("Multiple SMS UDH: ", udh)
+			fmt.Println("Multiple SMS UDH: ", udh)
 			response, err = sendReq(client.Username, client.Pass, req.To, udh, req.From, req.Text[pivot:pivot+160], dlrURL)
 			if err != nil {
-				log.Printf("Error on sending SMS %d: %v\n", i, err)
+				fmt.Printf("Error on sending SMS %d: %v\n", i, err)
 			}
 			pivot += 160
 			i++
 		}
 		udh = fmt.Sprintf("050003%v%02d%02d", refCode, smsCount, i)
-		log.Println("Multiple SMS UDH: ", udh)
+		fmt.Println("Multiple SMS UDH: ", udh)
 		response, err = sendReq(client.Username, client.Pass, req.To, udh, req.From, req.Text[pivot:len(req.Text)], dlrURL)
 		if err != nil {
-			log.Printf("Error on sending last SMS: %v\n", err)
+			fmt.Printf("Error on sending last SMS: %v\n", err)
 		}
 	} else {
-		log.Println("Single SMS UDH: ", udh)
+		fmt.Println("Single SMS UDH: ", udh)
 		response, err = sendReq(client.Username, client.Pass, req.To, udh, req.From, req.Text, dlrURL)
 		if err != nil {
-			log.Printf("Error on sending request to VFirst: %v\n", err)
+			fmt.Printf("Error on sending request to VFirst: %v\n", err)
+			log.Fatalf("Error on sending request to VFirst: %v\n", err)
 		}
 
 	}
-	var newSMS = model.SMS{
-		To:           req.To,
-		From:         req.From,
-		Message:      req.Text,
-		VendorStatus: response,
-		Client:       client.Username,
-	}
-	model.AddSMS(database.Conn, newSMS)
+	// var newSMS = model.SMS{
+	// 	ID:           primitive.NewObjectID(),
+	// 	To:           req.To,
+	// 	From:         req.From,
+	// 	Message:      req.Text,
+	// 	VendorStatus: response,
+	// 	Client:       client.Username,
+	// }
+	model.AddSMS(database.Conn, bson.M{
+		"_id":           primitive.NewObjectID(),
+		"to":            req.To,
+		"from":          req.From,
+		"message":       req.Text,
+		"vendor_status": response,
+		"client":        client.Username,
+	})
+
 	c.JSON(http.StatusOK, gin.H{
 		"response": response,
 	})
@@ -91,13 +103,15 @@ func PushSMS(c *gin.Context) {
 func sendReq(uname, pass, to, udh, from, text, dlrURL string) (string, error) {
 	url := fmt.Sprintf("http://www.myvaluefirst.com/smpp/sendsms?username=%s&password=%s&to=%s&udh=%s&from=%s&text=%s&dlr-url=%s",
 		uname, pass, to, url.PathEscape(udh), from, url.PathEscape(text), url.QueryEscape(dlrURL))
-	log.Println("Sending req with url:", url)
+	fmt.Println("Sending req with url:", url)
 	resp, err := http.Get(url)
 	if err != nil {
+		log.Fatal("Error on calling myvalue endpoint")
 		return "", err
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		log.Fatal("Error on reading myvalue response")
 		return "", err
 	}
 	return string(body), nil

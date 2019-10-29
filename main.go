@@ -15,9 +15,9 @@ import (
 )
 
 func init() {
-	f, err := os.OpenFile("./vfirst.log", os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
+	f, err := os.OpenFile("/var/www/vfirst.log", os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
 	if err != nil {
-		log.Println("error opening file:", err)
+		log.Fatal("error opening file:", err)
 	}
 	defer f.Close()
 
@@ -25,7 +25,7 @@ func init() {
 	log.Println("This is a test log entry")
 
 	if err := database.Conn.Ping(context.Background(), readpref.Primary()); err != nil {
-		log.Println("Couldn't connect to the database", err)
+		log.Fatal("Couldn't connect to the database", err)
 	} else {
 		log.Println("Database connected!")
 	}
@@ -35,14 +35,14 @@ func main() {
 	gin.DisableConsoleColor()
 
 	// Logging to a file.
-	f, _ := os.Create("./gin.log")
+	f, _ := os.Create("/var/www/gin.log")
 	gin.DefaultWriter = f
 
 	router := gin.Default()
 	r := multitemplate.NewRenderer()
-	r.AddFromFiles("dashboard_page", "./web/index.html")
+	r.AddFromFiles("dashboard_page", "/var/www/web/index.html")
 	router.HTMLRender = r
-	router.Static("/public", "./public")
+	router.Static("/public", "/var/www/public")
 	router.GET("/", handler.ShowDashboard)
 	router.GET("/status", handler.UpdateStatus)
 	router.GET("/list", handler.VerifyToken(), handler.ListSMS)
