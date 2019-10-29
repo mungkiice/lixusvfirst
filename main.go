@@ -44,5 +44,5 @@ func main() {
 	router.GET("/list", VerifyToken(), listSMS)
 	router.POST("/push", VerifyToken(), pushSMS)
 	router.POST("/login", doLogin)
-	router.Run(":8080")
+	router.Run(":" + getConfiguration().Server.Port)
 }
