@@ -39,20 +39,20 @@ func FindAllSMS(c *mongo.Client, filter bson.M) (result []*SMS) {
 	collection := c.Database("vfirst").Collection("sms")
 	cur, err := collection.Find(context.TODO(), filter)
 	if err != nil {
-		log.Fatal("Error on finding the documents:", err)
+		log.Fatal("Error on finding sms documents:", err)
 	}
 	for cur.Next(context.TODO()) {
 		var status SMS
 		err := cur.Decode(&status)
 		if err != nil {
-			log.Fatal("Error on decoding the document:", err)
+			log.Fatal("Error on decoding sms document:", err)
 		}
 		result = append(result, &status)
 	}
 	return
 }
 
-func FindLatestMatchSMS(c *mongo.Client, filter bson.D) (sms SMS) {
+func FindLatestMatchSMS(c *mongo.Client, filter bson.D) (sms SMS, exists bool) {
 	fmt.Println("FindLatestMatchSMS")
 	opt := options.Find()
 	opt.SetSort(bson.D{{"_id", -1}})
@@ -68,9 +68,9 @@ func FindLatestMatchSMS(c *mongo.Client, filter bson.D) (sms SMS) {
 			log.Fatal("Error while decoding latest sms:", err)
 		}
 		fmt.Println("Found object with ID:", sms.ID)
-		return
+		return sms, true
 	}
-	return
+	return SMS{}, false
 }
 
 func AddSMS(c *mongo.Client, sms bson.M) interface{} {

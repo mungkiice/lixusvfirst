@@ -63,22 +63,30 @@ func UpdateStatus(c *gin.Context) {
 	// if err != nil {
 	// 	log.Println("Error on sort")
 	// }
-	sms := model.FindLatestMatchSMS(database.Conn, bson.D{
+	clientUname := strings.ToLower(regex.FindString(clientGUID))
+	sms, exists := model.FindLatestMatchSMS(database.Conn, bson.D{
 		{"to", receiver},
 		{"from", sender},
-		{"client", strings.ToLower(regex.FindString(clientGUID))},
+		{"client", clientUname},
 	})
-	modifiedItems := sms.UpdateSMS(database.Conn, bson.M{
-		"delivered_date":    deliveredDate,
-		"client_guid":       clientGUID,
-		"message_id":        uniqueID,
-		"client_seq_number": clientSN,
-		"circle":            circle,
-		"msg_status":        msgStatus,
-		"operator":          operator,
-		"time":              messageTime,
-	})
-	c.JSON(http.StatusOK, gin.H{
-		"modified_items": modifiedItems,
-	})
+	if exists {
+		provider, exists := model.FindMatchProvider(database.Conn, receiver)
+		if exists {
+			var client model.Client
+			if err := model.FindOneClient(database.Conn, bson.M{"username": clientUname}, &client); err != nil {
+				fmt.Println("Error on finding match client by username:", err)
+			}
+			client.PayBill(database.Conn, provider.Price)
+			sms.UpdateSMS(database.Conn, bson.M{
+				"delivered_date":    deliveredDate,
+				"client_guid":       clientGUID,
+				"message_id":        uniqueID,
+				"client_seq_number": clientSN,
+				"circle":            circle,
+				"msg_status":        msgStatus,
+				"operator":          operator,
+				"time":              messageTime,
+			})
+		}
+	}
 }

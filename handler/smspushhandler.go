@@ -30,6 +30,8 @@ func PushSMS(c *gin.Context) {
 	var response string
 	var err error
 	var client model.Client
+	var udh = ""
+
 	uname, ok := c.Get("uname")
 	if !ok {
 		fmt.Println("Error uname doesnt exists in context")
@@ -39,15 +41,30 @@ func PushSMS(c *gin.Context) {
 		fmt.Println("Error on finding match client by username:", err)
 	}
 
-	var udh = ""
 	if err = c.ShouldBind(&req); err != nil {
 		fmt.Println("Error on binding user request:", err)
 	}
+
+	provider, exists := model.FindMatchProvider(database.Conn, req.To)
+	if !exists {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "match provider not found",
+		})
+		return
+	}
+	if client.Balance < provider.Price {
+		c.JSON(http.StatusOK, gin.H{
+			"error": "your balance doesnt enough",
+		})
+		return
+	}
+
 	var dlrURL = "http://" + config.GetObject().Server.Host + ":" +
 		config.GetObject().Server.Port + "/status?unique_id=%7&" +
 		"reason=%2&to=%p&from=%P&time=%t&status=%d&delivered=" +
 		"%3&status_err=%4&client_guid=%5&client_sn=%6&circle=" +
 		"%8&operator=%9&txt_status=%13&submit_date=%14&msg_status=%16"
+
 	if len(req.Text) > 800 {
 		var pivot, i = 0, 1
 		rand.Seed(time.Now().UnixNano())
@@ -74,18 +91,9 @@ func PushSMS(c *gin.Context) {
 		response, err = sendReq(client.Username, client.Pass, req.To, udh, req.From, req.Text, dlrURL)
 		if err != nil {
 			fmt.Printf("Error on sending request to VFirst: %v\n", err)
-			log.Fatalf("Error on sending request to VFirst: %v\n", err)
 		}
-
 	}
-	// var newSMS = model.SMS{
-	// 	ID:           primitive.NewObjectID(),
-	// 	To:           req.To,
-	// 	From:         req.From,
-	// 	Message:      req.Text,
-	// 	VendorStatus: response,
-	// 	Client:       client.Username,
-	// }
+
 	model.AddSMS(database.Conn, bson.M{
 		"_id":           primitive.NewObjectID(),
 		"to":            req.To,
