@@ -12,10 +12,9 @@ import (
 )
 
 type Provider struct {
-	ID    primitive.ObjectID `bson:"_id, omitempty" json:"-"`
-	Name  string             `bson:"name"`
-	Code  []string           `bson:"codes"`
-	Price float64            `bson:"price"`
+	ID   primitive.ObjectID `bson:"_id, omitempty" json:"-"`
+	Name string             `bson:"name"`
+	Code []string           `bson:"codes"`
 }
 
 func FindAllProviders(c *mongo.Client, filter bson.M) (result []*Provider) {

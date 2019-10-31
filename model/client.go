@@ -10,11 +10,14 @@ import (
 )
 
 type Client struct {
-	ID       primitive.ObjectID `bson:"_id, omitempty" json:"-"`
-	Username string             `bson:"username" json:"username"`
-	Pass     string             `bson:"password" json:"-"`
-	Balance  float64            `bson:"balance" json:"balance"`
-	Token    string             `bson:"token" json:"token"`
+	ID        primitive.ObjectID `bson:"_id, omitempty" json:"-"`
+	Username  string             `bson:"username" json:"username"`
+	Pass      string             `bson:"password" json:"-"`
+	Token     string             `bson:"token" json:"token"`
+	Telkomsel int64              `bson:"telkomsel"`
+	Xl        int64              `bson:"xl"`
+	Tri       int64              `bson:"tri"`
+	Indosat   int64              `bson:"indosat"`
 }
 
 func FindOneClient(c *mongo.Client, filter bson.M, client *Client) error {
@@ -22,12 +25,11 @@ func FindOneClient(c *mongo.Client, filter bson.M, client *Client) error {
 		FindOne(context.TODO(), filter).Decode(client)
 }
 
-func (cl *Client) PayBill(c *mongo.Client, amount float64) {
-	newBalance := cl.Balance - amount
+func (cl *Client) DeductQuota(c *mongo.Client, providerName string) {
 	_, err := c.Database("vfirst").Collection("client").
 		UpdateOne(context.TODO(), bson.M{"_id": cl.ID},
-			bson.D{{Key: "$set", Value: bson.M{"balance": newBalance}}})
+			bson.D{{Key: "$inc", Value: bson.M{providerName: -1}}})
 	if err != nil {
-		log.Fatal("Error on paying bill:", err)
+		log.Fatal("Error on deducting quota ", providerName, err)
 	}
 }

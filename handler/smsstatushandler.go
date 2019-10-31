@@ -76,7 +76,7 @@ func UpdateStatus(c *gin.Context) {
 			if err := model.FindOneClient(database.Conn, bson.M{"username": clientUname}, &client); err != nil {
 				fmt.Println("Error on finding match client by username:", err)
 			}
-			client.PayBill(database.Conn, provider.Price)
+			client.DeductQuota(database.Conn, provider.Name)
 			sms.UpdateSMS(database.Conn, bson.M{
 				"delivered_date":    deliveredDate,
 				"client_guid":       clientGUID,

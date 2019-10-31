@@ -8,6 +8,8 @@ import (
 	"math/rand"
 	"net/http"
 	"net/url"
+	"reflect"
+	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -52,9 +54,11 @@ func PushSMS(c *gin.Context) {
 		})
 		return
 	}
-	if client.Balance < provider.Price {
+
+	quota := reflect.Indirect(reflect.ValueOf(&client)).FieldByName(strings.Title(provider.Name))
+	if quota.Int() < 1 {
 		c.JSON(http.StatusOK, gin.H{
-			"error": "your balance doesnt enough",
+			"error": "your quota is used up " + provider.Name,
 		})
 		return
 	}
