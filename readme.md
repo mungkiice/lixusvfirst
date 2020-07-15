@@ -28,8 +28,8 @@ Request Header
 Request Body
 ```
 {
-    "username":"demoindo1",
-    "password":"http9876"
+    "username":"{username}",
+    "password":"{pass}"
 }
 ```
 Response Body
